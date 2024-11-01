@@ -1,17 +1,9 @@
 # Asynchronous Jobs
 
-## Run locally
+This service periodically executes various jobs, such as trimming long-inactive and orphaned sessions on the jukebox
+nodes.
 
-python app.py
+## Development
 
-or use vscode debugger
-
-## Publish new version
-
-1. From devcontainer build app package:
-
-        make build
-
-2. From outside of devcontainer build and pub a docker image:
-
-        make docker-pub TAG=0.0.1
+Getting started with development for this service is straightforward - no prerequisites are required. Simply open the
+project in any IDE that supports devcontainers (VSCode is recommended), and you can begin working right away.

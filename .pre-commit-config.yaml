@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: poetry-check
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -16,12 +16,12 @@ repos:
       - id: isort
         args: [ jobs, tests ]
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 24.10.0
     hooks:
       - id: black
         args: [ jobs, tests ]
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.0
+    rev: 7.1.1
     hooks:
       - id: flake8
         name: flake8
@@ -32,7 +32,7 @@ repos:
       - id: gitlint
         args: [ --config=lint/.gitlint, --msg-filename ]
   - repo: https://github.com/pycqa/pylint
-    rev: v3.2.6
+    rev: v3.3.1
     hooks:
       - id: pylint
         args:
@@ -42,7 +42,7 @@ repos:
           ]
         files: jobs/
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.1
+    rev: v1.13.0
     hooks:
       - id: mypy
         additional_dependencies: [
@@ -52,7 +52,7 @@ repos:
         ]
         exclude: tests/
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.9
+    rev: 1.7.10
     hooks:
       - id: bandit
         args: [
