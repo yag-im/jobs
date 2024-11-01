@@ -5,5 +5,11 @@ nodes.
 
 ## Development
 
-Getting started with development for this service is straightforward - no prerequisites are required. Simply open the
-project in any IDE that supports devcontainers (VSCode is recommended), and you can begin working right away.
+### Prerequisite
+
+The following devcontainers should be up and running:
+
+    sessionsvc
+    jukeboxsvc
+
+Then simply open this project in any IDE that supports devcontainers (VSCode is recommended).
