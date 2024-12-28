@@ -41,7 +41,7 @@ def trim_long_paused(sessions: list[SessionDC]) -> None:
 
 
 def trim_orphans(sessions: list[SessionDC], nodes: list[ClusterStateResponseDTO.Node]) -> None:
-    logging.debug("trimming orphaned seesions/containers")
+    logging.debug("trimming orphaned sessions/containers")
 
     def sess_map_key(app_release_uuid: str, user_id: int) -> str:
         return f"{app_release_uuid}|{str(user_id)}"
