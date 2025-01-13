@@ -59,17 +59,15 @@ class RunContainerRequestDTO:
                 ver: str
                 window_system: WindowSystem = field(metadata={"by_value": True})
 
-            image_rev: str
             runner: Runner
             video_enc: VideoEnc = field(metadata={"by_value": True})  # streamd requirement
 
-            def image_tag(self) -> str:
-                res = "{}_{}_{}_{}_{}".format(  # pylint: disable=consider-using-f-string
+            def image_name_with_tag(self) -> str:
+                res = "{}_{}_{}:{}".format(  # pylint: disable=consider-using-f-string
                     self.runner.window_system,
                     self.video_enc,
                     self.runner.name,
                     self.runner.ver,
-                    self.image_rev,
                 )
                 return res
 
@@ -137,6 +135,7 @@ class ContainerRunSpecs:
         # x11-specific vars
         DISPLAY: t.Optional[str] = None
         SHOW_POINTER: t.Optional[bool] = None
+        NVIDIA_DRIVER_CAPABILITIES: t.Optional[str] = None
 
     @dataclass
     class Labels:
@@ -164,8 +163,8 @@ class ClusterStateResponseDTO:
         class Container:
             created: datetime.datetime
             id: str
-            specs: ContainerRunSpecs
-            stats: t.Optional[ContainerStats]  # e.g. not avail for a paused container
+            specs: t.Optional[ContainerRunSpecs]  # e.g. not avail for a paused container
+            stats: ContainerStats
             status: str
 
         attrs: NodeAttrs

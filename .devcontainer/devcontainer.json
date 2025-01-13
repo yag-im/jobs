@@ -7,8 +7,7 @@
         "--name=yag-jobs",
         "--add-host=jukeboxsvc.yag.dc:host-gateway",
         "--add-host=sessionsvc.yag.dc:host-gateway",
-		"--env-file=${localWorkspaceFolder}/.devcontainer/.env",
-        "--env-file=${localWorkspaceFolder}/.devcontainer/secret.env"
+		"--env-file=${localWorkspaceFolder}/.devcontainer/.env"
 	],
     "customizations": {
         "vscode": {
