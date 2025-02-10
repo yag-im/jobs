@@ -17,6 +17,7 @@ from jobs.services.sessionsvc import (
 )
 
 LONG_PAUSE_PERIOD = 600
+LONG_PENDING_PERIOD = 10
 ORPHANED_PERIOD = 10
 
 
@@ -37,6 +38,16 @@ def trim_long_paused(sessions: list[SessionDC]) -> None:
     for s in sessions:
         if (s.status == SessionStatus.PAUSED) and (now - s.updated).total_seconds() > LONG_PAUSE_PERIOD:
             logging.info("\tclosing long paused session: %s", s.id)
+            close_session(s.id)
+
+
+def trim_long_pending(sessions: list[SessionDC]) -> None:
+    logging.debug("trimming long pending sessions/containers")
+    log_sessions_report(sessions)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    for s in sessions:
+        if (s.status == SessionStatus.PENDING) and (now - s.updated).total_seconds() > LONG_PENDING_PERIOD:
+            logging.info("\tclosing long pending session: %s", s.id)
             close_session(s.id)
 
 
@@ -89,6 +100,7 @@ def run() -> None:
     cluster_state = get_cluster_state()
     trim_orphans(sessions=sessions.sessions, nodes=list(cluster_state.nodes.values()))
     trim_long_paused(sessions=sessions.sessions)
+    trim_long_pending(sessions=sessions.sessions)
 
 
 @catch_exceptions(cancel_on_failure=True)
