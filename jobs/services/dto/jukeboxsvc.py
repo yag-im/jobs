@@ -120,7 +120,8 @@ class ContainerRunSpecs:
         # pylint: disable=invalid-name
         COLOR_BITS: int
         FPS: int
-        MAX_INACTIVITY_PERIOD: int
+        LOADING_DURATION: int
+        MAX_INACTIVITY_DURATION: int
         RUN_MIDI_SYNTH: str
         SIGNALER_AUTH_TOKEN: str
         SIGNALER_HOST: str
