@@ -13,7 +13,7 @@ packages = [{ include = "jobs" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-marshmallow = "^3.21.3"
+marshmallow = "^3.26.2"
 marshmallow-dataclass = "^8.7.0"
 opentelemetry-distro = "*"
 opentelemetry-exporter-otlp = "*"
