@@ -17,8 +17,8 @@ from jobs.services.sessionsvc import (
 )
 
 LONG_PAUSE_PERIOD = 600
-LONG_PENDING_PERIOD = 10
-ORPHANED_PERIOD = 10
+LONG_PENDING_PERIOD = 15
+ORPHANED_PERIOD = 20
 
 
 def log_sessions_report(sessions: list[SessionDC]) -> None:
