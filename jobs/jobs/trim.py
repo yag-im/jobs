@@ -17,8 +17,8 @@ from jobs.services.sessionsvc import (
 )
 
 LONG_PAUSE_PERIOD = 600
-LONG_PENDING_PERIOD = 15
-ORPHANED_PERIOD = 20
+LONG_PENDING_PERIOD = 20
+ORPHANED_PERIOD = 30
 
 
 def log_sessions_report(sessions: list[SessionDC]) -> None:
@@ -96,7 +96,9 @@ def trim_orphans(sessions: list[SessionDC], nodes: list[ClusterStateResponseDTO.
 
 
 def run() -> None:
+    logging.debug("getting sessions")
     sessions = get_sessions()
+    logging.debug("getting cluster state")
     cluster_state = get_cluster_state()
     trim_orphans(sessions=sessions.sessions, nodes=list(cluster_state.nodes.values()))
     trim_long_paused(sessions=sessions.sessions)
