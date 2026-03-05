@@ -17,6 +17,7 @@ from jobs.services.sessionsvc import (
 )
 
 LONG_PAUSE_PERIOD = 600
+LONG_PAUSE_CONTAINER_PERIOD = 900
 LONG_PENDING_PERIOD = 20
 ORPHANED_PERIOD = 30
 
@@ -31,7 +32,10 @@ def log_sessions_report(sessions: list[SessionDC]) -> None:
     )
 
 
-def trim_long_paused(sessions: list[SessionDC]) -> None:
+def trim_long_paused(
+    sessions: list[SessionDC],
+    nodes: list[ClusterStateResponseDTO.Node],
+) -> None:
     logging.debug("trimming long paused sessions/containers")
     log_sessions_report(sessions)
     now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -39,6 +43,13 @@ def trim_long_paused(sessions: list[SessionDC]) -> None:
         if (s.status == SessionStatus.PAUSED) and (now - s.updated).total_seconds() > LONG_PAUSE_PERIOD:
             logging.info("\tclosing long paused session: %s", s.id)
             close_session(s.id)
+
+    # stop containers that have been paused for too long, irrespective of session state
+    for n in nodes:
+        for c in n.containers.values():
+            if c.status == "paused" and (now - c.created).total_seconds() > LONG_PAUSE_CONTAINER_PERIOD:
+                logging.info("\tstopping long paused container: %s on node %s", c.id, n.id)
+                stop_container(n.id, c.id)
 
 
 def trim_long_pending(sessions: list[SessionDC]) -> None:
@@ -101,7 +112,7 @@ def run() -> None:
     logging.debug("getting cluster state")
     cluster_state = get_cluster_state()
     trim_orphans(sessions=sessions.sessions, nodes=list(cluster_state.nodes.values()))
-    trim_long_paused(sessions=sessions.sessions)
+    trim_long_paused(sessions=sessions.sessions, nodes=list(cluster_state.nodes.values()))
     trim_long_pending(sessions=sessions.sessions)
 
 

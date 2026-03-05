@@ -5,7 +5,7 @@ from jobs.services.dto.jukeboxsvc import ClusterStateResponseDTO
 from jobs.services.helpers import get_http_client_session
 
 # getting cluster state is time consuming, so we need a longer timeout here than in sessionsvc
-REQUESTS_TIMEOUT_CONN_READ = (3, 30)
+REQUESTS_TIMEOUT_CONN_READ = (3, 60)
 JUKEBOXSVC_URL = os.environ["JUKEBOXSVC_URL"]
 
 
