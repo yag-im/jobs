@@ -1,30 +1,39 @@
 import os
+from http import HTTPStatus
+
+import httpx
+from jukeboxsvc_client import Client
+from jukeboxsvc_client.api.default import get_cluster_state as _get_cluster_state
+from jukeboxsvc_client.api.default import scale_cluster as _scale_cluster
+from jukeboxsvc_client.api.default import stop_container as _stop_container
+from jukeboxsvc_client.models import ClusterStateResponseDTO
 
 from jobs.jobs.misc import JobException
-from jobs.services.dto.jukeboxsvc import ClusterStateResponseDTO
-from jobs.services.helpers import get_http_client_session
 
-# getting cluster state is time consuming, so we need a longer timeout here than in sessionsvc
-REQUESTS_TIMEOUT_CONN_READ = (3, 120)
 JUKEBOXSVC_URL = os.environ["JUKEBOXSVC_URL"]
+_TIMEOUT = httpx.Timeout(connect=3, read=120, write=30, pool=10)
+
+
+def _client() -> Client:
+    return Client(base_url=JUKEBOXSVC_URL, timeout=_TIMEOUT)
 
 
 def get_cluster_state() -> ClusterStateResponseDTO:
-    s = get_http_client_session()
-    res = s.get(
-        url=f"{JUKEBOXSVC_URL}/cluster/state",
-        timeout=REQUESTS_TIMEOUT_CONN_READ,
-    )
-    if res.status_code != 200:
-        raise JobException(message=res.text)
-    return ClusterStateResponseDTO.Schema().load(data=res.json())
+    resp = _get_cluster_state.sync_detailed(client=_client())
+    if resp.status_code != HTTPStatus.OK:
+        raise JobException(message=resp.content.decode())
+    if resp.parsed is None:
+        raise JobException(message="empty response from cluster/state")
+    return resp.parsed
 
 
 def stop_container(node_id: str, container_id: str) -> None:
-    s = get_http_client_session()
-    res = s.post(
-        url=f"{JUKEBOXSVC_URL}/nodes/{node_id}/containers/{container_id}/stop",
-        timeout=REQUESTS_TIMEOUT_CONN_READ,
-    )
-    if res.status_code != 200:
-        raise JobException(message=res.text)
+    resp = _stop_container.sync_detailed(node_id=node_id, container_id=container_id, client=_client())
+    if resp.status_code != HTTPStatus.OK:
+        raise JobException(message=resp.content.decode())
+
+
+def scale_cluster() -> None:
+    resp = _scale_cluster.sync_detailed(client=_client())
+    if resp.status_code != HTTPStatus.OK:
+        raise JobException(message=resp.content.decode())

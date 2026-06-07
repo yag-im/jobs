@@ -31,6 +31,8 @@ bootstrap: ## Perform a bootstrap
 	source .venv/bin/activate \
 		&& pre-commit install \
 		&& pre-commit install --hook-type commit-msg
+	poetry install --with codegen
+	$(MAKE) generate-clients
 	# install app and all deps
 	poetry install
 
@@ -50,6 +52,7 @@ clean: ## Remove all generated artifacts (except .venv and .env)
 	rm -rf .pytest_cache
 	rm -rf .tox
 	rm -rf dist
+	rm -rf jobs/services/clients/jukeboxsvc
 
 .PHONY: docker-run
 docker-run: ## Run dev docker image
@@ -71,5 +74,18 @@ gha-build: ## GitHub action: install all deps, lint, test and build app
 	poetry install --only dev
 	$(MAKE) lint
 	$(MAKE) test
+	poetry install --with codegen
+	$(MAKE) generate-clients
 	poetry install
 	poetry build -f wheel
+
+.PHONY: update-clients
+update-clients:
+	curl -sSf $(JUKEBOXSVC_URL)/openapi.json | python3 -m json.tool > jobs/services/clients/jukeboxsvc.json
+	$(MAKE) generate-clients
+
+.PHONY: generate-clients
+generate-clients:
+	poetry run openapi-python-client generate --overwrite \
+		--path jobs/services/clients/jukeboxsvc.json \
+		--output-path jobs/services/clients/jukeboxsvc

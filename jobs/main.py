@@ -2,10 +2,12 @@ import logging
 import queue
 import threading
 import time
+from typing import Callable
 
 import schedule
 
-from jobs.jobs.trim import trim_job
+# from jobs.jobs.scale_cluster import scale_cluster_job
+from jobs.jobs.trim_sessions import trim_sessions_job
 
 
 def init_log() -> None:
@@ -22,24 +24,34 @@ def init_log() -> None:
     root_log.propagate = False
 
     # talkative modules:
-    logging.getLogger("schedule").setLevel(logging.INFO)
-    logging.getLogger("urllib3").setLevel(logging.INFO)
+    for module in ["schedule", "urllib3", "httpx", "httpcore"]:
+        logging.getLogger(module).setLevel(logging.INFO)
 
 
-def worker_main() -> None:
+def worker_main(jobqueue: queue.Queue) -> None:
     while 1:
         job_func = jobqueue.get()
         job_func()
         jobqueue.task_done()
 
 
-jobqueue: queue.Queue = queue.Queue()
+def enqueue_if_empty(jobqueue: queue.Queue, job_func: Callable) -> None:
+    if jobqueue.empty():
+        jobqueue.put(job_func)
 
-schedule.every(5).seconds.do(jobqueue.put, trim_job)
+
+trim_sessions_queue: queue.Queue = queue.Queue()
+scale_cluster_queue: queue.Queue = queue.Queue()
+
+schedule.every(5).seconds.do(enqueue_if_empty, trim_sessions_queue, trim_sessions_job)
+# schedule.every(1).minutes.do(enqueue_if_empty, scale_cluster_queue, scale_cluster_job)
 
 
-worker_thread = threading.Thread(target=worker_main)
+worker_thread = threading.Thread(target=worker_main, args=(trim_sessions_queue,))
 worker_thread.start()
+
+scale_worker_thread = threading.Thread(target=worker_main, args=(scale_cluster_queue,))
+scale_worker_thread.start()
 
 if __name__ == "__main__":
     init_log()

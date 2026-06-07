@@ -6,7 +6,7 @@ from unittest.mock import (
 
 import pytest
 
-from jobs.jobs.trim import (
+from jobs.jobs.trim_sessions import (
     LONG_PAUSE_CONTAINER_PERIOD,
     LONG_PAUSE_PERIOD,
     LONG_PENDING_PERIOD,
@@ -56,7 +56,7 @@ def _make_container(
     user_id: str = "1",
     app_slug: str = "some-app",
 ):
-    """Return a minimal Container-like stub (mirrors ClusterStateResponseDTO.Node.Container)."""
+    """Return a minimal Container-like stub"""
     c = MagicMock()
     c.id = cid
     c.status = status
@@ -68,10 +68,10 @@ def _make_container(
 
 
 def _make_node(*, node_id: str = "n1", containers: list | None = None):
-    """Return a minimal Node-like stub (mirrors ClusterStateResponseDTO.Node)."""
+    """Return a minimal Node-like stub"""
     n = MagicMock()
     n.id = node_id
-    n.containers = {c.id: c for c in (containers or [])}
+    n.containers = list(containers or [])
     return n
 
 
@@ -82,9 +82,9 @@ def _make_node(*, node_id: str = "n1", containers: list | None = None):
 
 @pytest.mark.unit
 class TestTrimLongPausedSessions:
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_closes_paused_session_older_than_threshold(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -93,9 +93,9 @@ class TestTrimLongPausedSessions:
         mock_close.assert_called_once_with("s1")
         mock_stop.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_close_recently_paused_session(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -103,9 +103,9 @@ class TestTrimLongPausedSessions:
         trim_long_paused([session], nodes=[])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_close_active_session(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -113,9 +113,9 @@ class TestTrimLongPausedSessions:
         trim_long_paused([session], nodes=[])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_closes_multiple_paused_sessions(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -137,9 +137,9 @@ class TestTrimLongPausedSessions:
 
 @pytest.mark.unit
 class TestTrimLongPausedContainers:
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_stops_container_paused_longer_than_threshold(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -149,9 +149,9 @@ class TestTrimLongPausedContainers:
         mock_stop.assert_called_once_with("n1", "c1")
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_stop_recently_paused_container(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -160,9 +160,9 @@ class TestTrimLongPausedContainers:
         trim_long_paused([], nodes=[node])
         mock_stop.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_stop_running_container(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -171,9 +171,9 @@ class TestTrimLongPausedContainers:
         trim_long_paused([], nodes=[node])
         mock_stop.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_stops_containers_across_multiple_nodes(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -188,9 +188,9 @@ class TestTrimLongPausedContainers:
         mock_stop.assert_any_call("n1", "c1")
         mock_stop.assert_any_call("n2", "c2")
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_handles_sessions_and_containers_together(self, mock_dt, mock_stop, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -209,8 +209,8 @@ class TestTrimLongPausedContainers:
 
 @pytest.mark.unit
 class TestTrimLongPending:
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_closes_pending_session_older_than_threshold(self, mock_dt, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -218,8 +218,8 @@ class TestTrimLongPending:
         trim_long_pending([session])
         mock_close.assert_called_once_with("s1")
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_close_recently_pending_session(self, mock_dt, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -227,8 +227,8 @@ class TestTrimLongPending:
         trim_long_pending([session])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_ignores_active_sessions(self, mock_dt, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -236,8 +236,8 @@ class TestTrimLongPending:
         trim_long_pending([session])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_ignores_paused_sessions(self, mock_dt, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -245,8 +245,8 @@ class TestTrimLongPending:
         trim_long_pending([session])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_closes_multiple_pending_sessions(self, mock_dt, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -260,8 +260,8 @@ class TestTrimLongPending:
         mock_close.assert_any_call("s1")
         mock_close.assert_any_call("s2")
 
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_no_sessions_does_nothing(self, mock_dt, mock_close):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -276,9 +276,9 @@ class TestTrimLongPending:
 
 @pytest.mark.unit
 class TestTrimOrphans:
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_closes_orphaned_session_without_matching_container(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -288,9 +288,9 @@ class TestTrimOrphans:
         mock_close.assert_called_once_with("s1")
         mock_stop.assert_not_called()
 
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_close_session_with_matching_container(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -300,9 +300,9 @@ class TestTrimOrphans:
         trim_orphans([session], [node])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_stops_orphaned_container_without_matching_session(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -312,9 +312,9 @@ class TestTrimOrphans:
         mock_stop.assert_called_once_with("n1", "c1")
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_stop_young_orphaned_container(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -323,9 +323,9 @@ class TestTrimOrphans:
         trim_orphans([], [node])
         mock_stop.assert_not_called()
 
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_does_not_close_young_orphaned_session(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -333,9 +333,9 @@ class TestTrimOrphans:
         trim_orphans([session], [])
         mock_close.assert_not_called()
 
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_matched_session_and_container_are_not_orphaned(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -346,9 +346,9 @@ class TestTrimOrphans:
         mock_close.assert_not_called()
         mock_stop.assert_not_called()
 
-    @patch("jobs.jobs.trim.stop_container")
-    @patch("jobs.jobs.trim.close_session")
-    @patch("jobs.jobs.trim.datetime")
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.datetime")
     def test_multiple_orphans_in_both_directions(self, mock_dt, mock_close, mock_stop):
         mock_dt.datetime.now.return_value = _NOW
         mock_dt.timezone = datetime.timezone
@@ -371,17 +371,17 @@ class TestTrimOrphans:
 
 @pytest.mark.unit
 class TestRun:
-    @patch("jobs.jobs.trim.trim_long_pending")
-    @patch("jobs.jobs.trim.trim_long_paused")
-    @patch("jobs.jobs.trim.trim_orphans")
-    @patch("jobs.jobs.trim.get_cluster_state")
-    @patch("jobs.jobs.trim.get_sessions")
+    @patch("jobs.jobs.trim_sessions.trim_long_pending")
+    @patch("jobs.jobs.trim_sessions.trim_long_paused")
+    @patch("jobs.jobs.trim_sessions.trim_orphans")
+    @patch("jobs.jobs.trim_sessions.get_cluster_state")
+    @patch("jobs.jobs.trim_sessions.get_sessions")
     def test_run_calls_all_trimmers(self, mock_get_sessions, mock_get_cluster, mock_orphans, mock_paused, mock_pending):
         session = _make_session(sid="s1")
         mock_get_sessions.return_value.sessions = [session]
 
         node = _make_node(node_id="n1")
-        mock_get_cluster.return_value.nodes = {"n1": node}
+        mock_get_cluster.return_value.nodes = [node]
 
         run()
 

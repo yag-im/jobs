@@ -13,6 +13,8 @@ packages = [{ include = "jobs" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+httpx = ">=0.23.1,<0.29.0"
+jukeboxsvc-client = {path = "jobs/services/clients/jukeboxsvc", develop = true}
 marshmallow = "^3.26.2"
 marshmallow-dataclass = "^8.7.0"
 opentelemetry-distro = "*"
@@ -28,6 +30,9 @@ tox = "*"
 [tool.poetry.group.test.dependencies]
 pytest = "*"
 pytest-dotenv = "*"
+
+[tool.poetry.group.codegen.dependencies]
+openapi-python-client = "*"
 
 [tool.poetry-dynamic-versioning]
 enable = true

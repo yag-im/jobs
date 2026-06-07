@@ -1,7 +1,7 @@
 # Asynchronous Jobs
 
 This service periodically executes various jobs, such as trimming long-inactive and orphaned sessions on the jukebox
-nodes.
+nodes, scaling jukebox nodes cluster etc.
 
 ## Development
 

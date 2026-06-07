@@ -1,0 +1,1332 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "jukeboxsvc",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/nodes/{node_id}/containers/{container_id}/pause": {
+            "post": {
+                "summary": "Container Pause",
+                "description": "Pauses a running container.",
+                "operationId": "pause_container",
+                "parameters": [
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Node Id"
+                        }
+                    },
+                    {
+                        "name": "container_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Container Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/containers/run": {
+            "post": {
+                "summary": "Container Run",
+                "description": "Runs a new container on the most suitable cluster node.",
+                "operationId": "run_container",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RunContainerRequestDTO"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RunContainerResponseDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/nodes/{node_id}/containers/{container_id}/stop": {
+            "post": {
+                "summary": "Container Stop",
+                "description": "Stops a running container.",
+                "operationId": "stop_container",
+                "parameters": [
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Node Id"
+                        }
+                    },
+                    {
+                        "name": "container_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Container Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/nodes/{node_id}/containers/{container_id}/resume": {
+            "post": {
+                "summary": "Container Resume",
+                "description": "Resumes a paused container.",
+                "operationId": "resume_container",
+                "parameters": [
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Node Id"
+                        }
+                    },
+                    {
+                        "name": "container_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Container Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResumeContainerRequestDTO"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cluster/status": {
+            "get": {
+                "summary": "Cluster Status Endpoint",
+                "description": "Returns cluster usage per region.",
+                "operationId": "get_cluster_status",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClusterUsageResponseDTO"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cluster/pull_image": {
+            "post": {
+                "summary": "Cluster Pull Image",
+                "description": "Pulls specified image onto all available cluster nodes (asynchronously).",
+                "operationId": "pull_cluster_image",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PullContainerImageRequestDTO"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cluster/state": {
+            "get": {
+                "summary": "Cluster State",
+                "description": "Returns current state of all jukebox cluster nodes,\nfetched directly from Docker daemons on all jukebox nodes.",
+                "operationId": "get_cluster_state",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClusterStateResponseDTO"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cluster/scale": {
+            "post": {
+                "summary": "Cluster Scale",
+                "description": "Scales the jukebox cluster: adds nodes when CPU utilization exceeds threshold,\nremoves old underutilized nodes, and syncs the OVH cluster state with SQL cluster schema.",
+                "operationId": "scale_cluster",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ovh/cluster/nodes": {
+            "get": {
+                "summary": "Ovh Cluster Nodes",
+                "description": "Returns list of all nodes in the OVH cluster.",
+                "operationId": "get_ovh_cluster_nodes",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/OvhClusterNodeDescr"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Get Ovh Cluster Nodes"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ovh/cluster/nodes/create": {
+            "post": {
+                "summary": "Ovh Cluster Node Create",
+                "description": "Creates a new node in the OVH cluster.",
+                "operationId": "create_ovh_cluster_node",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCloudInstanceRequestDTO"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateCloudInstanceResponseDTO"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ovh/cluster/nodes/{node_id}/delete": {
+            "post": {
+                "summary": "Ovh Cluster Node Delete",
+                "description": "Deletes a node from the OVH cluster.",
+                "operationId": "delete_ovh_cluster_node",
+                "parameters": [
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Node Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AppDescr": {
+                "properties": {
+                    "slug": {
+                        "type": "string",
+                        "title": "Slug"
+                    },
+                    "release_uuid": {
+                        "type": "string",
+                        "title": "Release Uuid"
+                    },
+                    "release_uuidv4": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Release Uuidv4"
+                    },
+                    "platform": {
+                        "$ref": "#/components/schemas/AppPlatform"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "slug",
+                    "release_uuid",
+                    "release_uuidv4",
+                    "platform"
+                ],
+                "title": "AppDescr"
+            },
+            "AppPlatform": {
+                "type": "string",
+                "enum": [
+                    "dos",
+                    "mac",
+                    "philips-cd-i",
+                    "genesis-slash-megadrive",
+                    "win",
+                    "zxs"
+                ],
+                "title": "AppPlatform"
+            },
+            "AppRequirements": {
+                "properties": {
+                    "color_bits": {
+                        "type": "integer",
+                        "title": "Color Bits"
+                    },
+                    "midi": {
+                        "type": "boolean",
+                        "title": "Midi"
+                    },
+                    "screen_height": {
+                        "type": "integer",
+                        "title": "Screen Height"
+                    },
+                    "screen_width": {
+                        "type": "integer",
+                        "title": "Screen Width"
+                    },
+                    "loading_duration": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Loading Duration"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "color_bits",
+                    "midi",
+                    "screen_height",
+                    "screen_width"
+                ],
+                "title": "AppRequirements"
+            },
+            "Attrs": {
+                "properties": {
+                    "cpuset_cpus": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Cpuset Cpus"
+                    },
+                    "image_tag": {
+                        "type": "string",
+                        "title": "Image Tag"
+                    },
+                    "memory_limit": {
+                        "type": "integer",
+                        "title": "Memory Limit"
+                    },
+                    "memory_shared": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Memory Shared"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "nanocpus_limit": {
+                        "type": "integer",
+                        "title": "Nanocpus Limit"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "cpuset_cpus",
+                    "image_tag",
+                    "memory_limit",
+                    "name",
+                    "nanocpus_limit"
+                ],
+                "title": "Attrs"
+            },
+            "ClusterStateResponseDTO": {
+                "properties": {
+                    "nodes": {
+                        "items": {
+                            "$ref": "#/components/schemas/NodeDTO"
+                        },
+                        "type": "array",
+                        "title": "Nodes"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "nodes"
+                ],
+                "title": "ClusterStateResponseDTO"
+            },
+            "ClusterUsageResponseDTO": {
+                "properties": {
+                    "regions": {
+                        "items": {
+                            "$ref": "#/components/schemas/RegionUsage"
+                        },
+                        "type": "array",
+                        "title": "Regions"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "regions"
+                ],
+                "title": "ClusterUsageResponseDTO"
+            },
+            "ContainerDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "specs": {
+                        "$ref": "#/components/schemas/ContainerRunSpecs"
+                    },
+                    "created": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Created"
+                    },
+                    "stats": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ContainerStats"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "status",
+                    "specs"
+                ],
+                "title": "ContainerDTO"
+            },
+            "ContainerDescr": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "cpuset_cpus": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Cpuset Cpus"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "cpuset_cpus"
+                ],
+                "title": "ContainerDescr"
+            },
+            "ContainerRunSpecs": {
+                "properties": {
+                    "attrs": {
+                        "$ref": "#/components/schemas/Attrs"
+                    },
+                    "env_vars": {
+                        "$ref": "#/components/schemas/EnvVars"
+                    },
+                    "labels": {
+                        "$ref": "#/components/schemas/Labels"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "attrs",
+                    "env_vars",
+                    "labels"
+                ],
+                "title": "ContainerRunSpecs"
+            },
+            "ContainerSpecs": {
+                "properties": {
+                    "runner": {
+                        "$ref": "#/components/schemas/Runner"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "runner"
+                ],
+                "title": "ContainerSpecs"
+            },
+            "ContainerStats": {
+                "properties": {
+                    "cpu_throttling_data": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "type": "object",
+                        "title": "Cpu Throttling Data"
+                    },
+                    "cpu_usage_perc": {
+                        "type": "number",
+                        "title": "Cpu Usage Perc"
+                    },
+                    "memory_usage_perc": {
+                        "type": "number",
+                        "title": "Memory Usage Perc"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "cpu_throttling_data",
+                    "cpu_usage_perc",
+                    "memory_usage_perc"
+                ],
+                "title": "ContainerStats"
+            },
+            "CreateCloudInstanceRequestDTO": {
+                "properties": {
+                    "flavor": {
+                        "$ref": "#/components/schemas/OvhNodeFlavor"
+                    },
+                    "image": {
+                        "type": "string",
+                        "title": "Image"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "region": {
+                        "$ref": "#/components/schemas/DcRegion"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "flavor",
+                    "image",
+                    "name",
+                    "region"
+                ],
+                "title": "CreateCloudInstanceRequestDTO"
+            },
+            "CreateCloudInstanceResponseDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "title": "CreateCloudInstanceResponseDTO"
+            },
+            "DcRegion": {
+                "type": "string",
+                "enum": [
+                    "eu-central-1",
+                    "us-east-1",
+                    "us-west-1"
+                ],
+                "title": "DcRegion"
+            },
+            "EnvVars": {
+                "properties": {
+                    "COLOR_BITS": {
+                        "type": "integer",
+                        "title": "Color Bits"
+                    },
+                    "FPS": {
+                        "type": "integer",
+                        "title": "Fps"
+                    },
+                    "LOADING_DURATION": {
+                        "type": "integer",
+                        "title": "Loading Duration"
+                    },
+                    "MAX_INACTIVITY_DURATION": {
+                        "type": "integer",
+                        "title": "Max Inactivity Duration"
+                    },
+                    "RUN_MIDI_SYNTH": {
+                        "type": "string",
+                        "title": "Run Midi Synth"
+                    },
+                    "SIGNALER_AUTH_TOKEN": {
+                        "type": "string",
+                        "title": "Signaler Auth Token"
+                    },
+                    "SIGNALER_HOST": {
+                        "type": "string",
+                        "title": "Signaler Host"
+                    },
+                    "SIGNALER_URI": {
+                        "type": "string",
+                        "title": "Signaler Uri"
+                    },
+                    "SCREEN_HEIGHT": {
+                        "type": "integer",
+                        "title": "Screen Height"
+                    },
+                    "SCREEN_WIDTH": {
+                        "type": "integer",
+                        "title": "Screen Width"
+                    },
+                    "STUN_URI": {
+                        "type": "string",
+                        "title": "Stun Uri"
+                    },
+                    "WS_CONN_ID": {
+                        "type": "string",
+                        "title": "Ws Conn Id"
+                    },
+                    "WS_CONSUMER_ID": {
+                        "type": "string",
+                        "title": "Ws Consumer Id"
+                    },
+                    "GST_DEBUG": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Gst Debug"
+                    },
+                    "DISPLAY": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Display"
+                    },
+                    "SHOW_POINTER": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Show Pointer"
+                    },
+                    "NVIDIA_DRIVER_CAPABILITIES": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Nvidia Driver Capabilities"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "COLOR_BITS",
+                    "FPS",
+                    "LOADING_DURATION",
+                    "MAX_INACTIVITY_DURATION",
+                    "RUN_MIDI_SYNTH",
+                    "SIGNALER_AUTH_TOKEN",
+                    "SIGNALER_HOST",
+                    "SIGNALER_URI",
+                    "SCREEN_HEIGHT",
+                    "SCREEN_WIDTH",
+                    "STUN_URI",
+                    "WS_CONN_ID",
+                    "WS_CONSUMER_ID"
+                ],
+                "title": "EnvVars"
+            },
+            "GpuModel": {
+                "type": "string",
+                "enum": [
+                    "intel-uhd-p630",
+                    "intel-uhd-750",
+                    "nvidia-gtx-1060",
+                    "nvidia-tesla-v100s",
+                    "nvidia-l4"
+                ],
+                "title": "GpuModel"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "HardwareRequirements": {
+                "properties": {
+                    "gpu": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/GpuModel"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "memory": {
+                        "type": "integer",
+                        "title": "Memory"
+                    },
+                    "memory_shared": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Memory Shared"
+                    },
+                    "nanocpus": {
+                        "type": "integer",
+                        "title": "Nanocpus"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "gpu",
+                    "memory",
+                    "nanocpus"
+                ],
+                "title": "HardwareRequirements"
+            },
+            "Labels": {
+                "properties": {
+                    "app_release_uuid": {
+                        "type": "string",
+                        "title": "App Release Uuid"
+                    },
+                    "app_slug": {
+                        "type": "string",
+                        "title": "App Slug"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "title": "User Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "app_release_uuid",
+                    "app_slug",
+                    "user_id"
+                ],
+                "title": "Labels"
+            },
+            "NodeDTO": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "region": {
+                        "type": "string",
+                        "title": "Region"
+                    },
+                    "flavor": {
+                        "type": "string",
+                        "title": "Flavor"
+                    },
+                    "hw_specs": {
+                        "$ref": "#/components/schemas/NodeHwSpecs"
+                    },
+                    "created_ts": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created Ts"
+                    },
+                    "cpu_usage_total": {
+                        "type": "number",
+                        "title": "Cpu Usage Total"
+                    },
+                    "memory_usage_total": {
+                        "type": "number",
+                        "title": "Memory Usage Total"
+                    },
+                    "containers": {
+                        "items": {
+                            "$ref": "#/components/schemas/ContainerDTO"
+                        },
+                        "type": "array",
+                        "title": "Containers"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "region",
+                    "flavor",
+                    "hw_specs",
+                    "created_ts",
+                    "cpu_usage_total",
+                    "memory_usage_total",
+                    "containers"
+                ],
+                "title": "NodeDTO"
+            },
+            "NodeDescr": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "api_uri": {
+                        "type": "string",
+                        "title": "Api Uri"
+                    },
+                    "region": {
+                        "$ref": "#/components/schemas/DcRegion"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "api_uri",
+                    "region"
+                ],
+                "title": "NodeDescr"
+            },
+            "NodeHwSpecs": {
+                "properties": {
+                    "gpus": {
+                        "items": {
+                            "$ref": "#/components/schemas/GpuModel"
+                        },
+                        "type": "array",
+                        "title": "Gpus"
+                    },
+                    "cpus": {
+                        "type": "integer",
+                        "title": "Cpus"
+                    },
+                    "total_memory": {
+                        "type": "integer",
+                        "title": "Total Memory"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "gpus",
+                    "cpus",
+                    "total_memory"
+                ],
+                "title": "NodeHwSpecs",
+                "description": "Node hardware specs"
+            },
+            "OvhClusterNodeDescr": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "region": {
+                        "$ref": "#/components/schemas/DcRegion"
+                    },
+                    "node_type": {
+                        "$ref": "#/components/schemas/OvhNodeType"
+                    },
+                    "flavor": {
+                        "$ref": "#/components/schemas/OvhNodeFlavor"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/OvhNodeStatus"
+                    },
+                    "private_ip": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Private Ip"
+                    },
+                    "public_ip": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Public Ip"
+                    },
+                    "created_ts": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Created Ts"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "region",
+                    "node_type",
+                    "flavor",
+                    "status"
+                ],
+                "title": "OvhClusterNodeDescr"
+            },
+            "OvhNodeFlavor": {
+                "type": "string",
+                "enum": [
+                    "CUSTOM-1",
+                    "RISE-3",
+                    "b2-7",
+                    "b3-8",
+                    "d2-2",
+                    "d2-8",
+                    "l4-90",
+                    "l4-180",
+                    "t2-le-45",
+                    "t2-le-90"
+                ],
+                "title": "OvhNodeFlavor"
+            },
+            "OvhNodeStatus": {
+                "type": "string",
+                "enum": [
+                    "ACTIVE",
+                    "BUILD",
+                    "BUILDING",
+                    "DELETED",
+                    "DELETING",
+                    "ERROR"
+                ],
+                "title": "OvhNodeStatus"
+            },
+            "OvhNodeType": {
+                "type": "string",
+                "enum": [
+                    "dedicated",
+                    "public-cloud-instance"
+                ],
+                "title": "OvhNodeType"
+            },
+            "PullContainerImageRequestDTO": {
+                "properties": {
+                    "repository": {
+                        "type": "string",
+                        "title": "Repository"
+                    },
+                    "tag": {
+                        "type": "string",
+                        "title": "Tag"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "repository",
+                    "tag"
+                ],
+                "title": "PullContainerImageRequestDTO"
+            },
+            "RegionUsage": {
+                "properties": {
+                    "region": {
+                        "type": "string",
+                        "title": "Region"
+                    },
+                    "usage": {
+                        "type": "number",
+                        "title": "Usage"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "region",
+                    "usage"
+                ],
+                "title": "RegionUsage"
+            },
+            "Requirements": {
+                "properties": {
+                    "app": {
+                        "$ref": "#/components/schemas/AppRequirements"
+                    },
+                    "container": {
+                        "$ref": "#/components/schemas/ContainerSpecs"
+                    },
+                    "hw": {
+                        "$ref": "#/components/schemas/HardwareRequirements"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "app",
+                    "container",
+                    "hw"
+                ],
+                "title": "Requirements"
+            },
+            "ResumeContainerRequestDTO": {
+                "properties": {
+                    "ws_conn": {
+                        "$ref": "#/components/schemas/WsConnDC"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "ws_conn"
+                ],
+                "title": "ResumeContainerRequestDTO"
+            },
+            "RunContainerRequestDTO": {
+                "properties": {
+                    "app_descr": {
+                        "$ref": "#/components/schemas/AppDescr"
+                    },
+                    "preferred_dcs": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Preferred Dcs"
+                    },
+                    "reqs": {
+                        "$ref": "#/components/schemas/Requirements"
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "title": "User Id"
+                    },
+                    "ws_conn": {
+                        "$ref": "#/components/schemas/WsConnDC"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "app_descr",
+                    "preferred_dcs",
+                    "reqs",
+                    "user_id",
+                    "ws_conn"
+                ],
+                "title": "RunContainerRequestDTO"
+            },
+            "RunContainerResponseDTO": {
+                "properties": {
+                    "node": {
+                        "$ref": "#/components/schemas/NodeDescr"
+                    },
+                    "container": {
+                        "$ref": "#/components/schemas/ContainerDescr"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "node",
+                    "container"
+                ],
+                "title": "RunContainerResponseDTO"
+            },
+            "Runner": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "ver": {
+                        "type": "string",
+                        "title": "Ver"
+                    },
+                    "window_system": {
+                        "$ref": "#/components/schemas/WindowSystem"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "ver",
+                    "window_system"
+                ],
+                "title": "Runner"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            },
+            "WindowSystem": {
+                "type": "string",
+                "enum": [
+                    "x11",
+                    "wayland"
+                ],
+                "title": "WindowSystem"
+            },
+            "WsConnDC": {
+                "properties": {
+                    "consumer_id": {
+                        "type": "string",
+                        "title": "Consumer Id"
+                    },
+                    "id": {
+                        "type": "string",
+                        "title": "Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "consumer_id",
+                    "id"
+                ],
+                "title": "WsConnDC",
+                "description": "Websocket connection (sigsvc) parameters."
+            }
+        }
+    }
+}
