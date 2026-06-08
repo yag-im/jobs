@@ -468,24 +468,6 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
-name = "jukeboxsvc-client"
-version = "0.1.0"
-description = "A client library for accessing jukeboxsvc"
-optional = false
-python-versions = "^3.11"
-groups = ["main"]
-files = []
-develop = true
-
-[package.dependencies]
-attrs = ">=22.2.0"
-httpx = ">=0.23.1,<0.29.0"
-
-[package.source]
-type = "directory"
-url = "jobs/services/clients/jukeboxsvc"
-
-[[package]]
 name = "markdown-it-py"
 version = "4.2.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
@@ -1624,4 +1606,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "65d52105db306739cc320a8e3a8b31cd3d28369642970aa86451856621fe90ee"
+content-hash = "c5c71b91a2fbc9dd49b30a590797e2806c72606d72b6f8fcc2078b0996db0886"

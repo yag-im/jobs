@@ -1,13 +1,12 @@
 import datetime
 import logging
 
-from jukeboxsvc_client.models import (
+from jobs.jobs.misc import catch_exceptions
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.models import (
     ContainerDTO,
     NodeDTO,
 )
-from jukeboxsvc_client.types import Unset
-
-from jobs.jobs.misc import catch_exceptions
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.types import Unset
 from jobs.services.dto.sessionsvc import (
     SessionDC,
     SessionStatus,

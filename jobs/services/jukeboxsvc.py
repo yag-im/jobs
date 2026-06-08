@@ -2,20 +2,20 @@ import os
 from http import HTTPStatus
 
 import httpx
-from jukeboxsvc_client import Client
-from jukeboxsvc_client.api.default import get_cluster_state as _get_cluster_state
-from jukeboxsvc_client.api.default import scale_cluster as _scale_cluster
-from jukeboxsvc_client.api.default import stop_container as _stop_container
-from jukeboxsvc_client.models import ClusterStateResponseDTO
 
 from jobs.jobs.misc import JobException
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client import Client
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import get_cluster_state as _get_cluster_state
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import scale_cluster as _scale_cluster
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import stop_container as _stop_container
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.models import ClusterStateResponseDTO
 
 JUKEBOXSVC_URL = os.environ["JUKEBOXSVC_URL"]
 _TIMEOUT = httpx.Timeout(connect=3, read=120, write=30, pool=10)
 
 
 def _client() -> Client:
-    return Client(base_url=JUKEBOXSVC_URL, timeout=_TIMEOUT)
+    return Client(base_url=JUKEBOXSVC_URL, timeout=_TIMEOUT)  # type: ignore[call-arg]
 
 
 def get_cluster_state() -> ClusterStateResponseDTO:

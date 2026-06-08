@@ -25,7 +25,7 @@ bootstrap: ## Perform a bootstrap
 	# help IDEs to recognize venv's python interpreter
 	poetry config virtualenvs.in-project true
 	poetry self add "poetry-dynamic-versioning[plugin]"
-	poetry install --with codegen --no-directory
+	poetry install --with codegen
 	$(MAKE) generate-clients
 	# poetry will create .venv as well:
 	poetry install --only dev
@@ -71,7 +71,7 @@ docker-build: ## Build docker image
 
 .PHONY: gha-build
 gha-build: ## GitHub action: install all deps, lint, test and build app
-	poetry install --with codegen --no-directory
+	poetry install --with codegen
 	$(MAKE) generate-clients
 	poetry install --only dev
 	$(MAKE) lint

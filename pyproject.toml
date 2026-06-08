@@ -13,8 +13,8 @@ packages = [{ include = "jobs" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+attrs = ">=22.2.0"
 httpx = ">=0.23.1,<0.29.0"
-jukeboxsvc-client = {path = "jobs/services/clients/jukeboxsvc", develop = true}
 marshmallow = "^3.26.2"
 marshmallow-dataclass = "^8.7.0"
 opentelemetry-distro = "*"
@@ -71,6 +71,11 @@ disallow_incomplete_defs = true
 disallow_untyped_defs = true
 ignore_missing_imports = true
 plugins = "marshmallow_dataclass.mypy"
+
+[[tool.mypy.overrides]]
+# generated code
+module = "jobs.services.clients.*"
+ignore_errors = true
 
 [tool.pytest.ini_options]
 addopts = "-s -v"
