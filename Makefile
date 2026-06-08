@@ -89,3 +89,5 @@ generate-clients:
 	poetry run openapi-python-client generate --overwrite \
 		--path jobs/services/clients/jukeboxsvc.json \
 		--output-path jobs/services/clients/jukeboxsvc
+	# so poetry doesn't treat it as a separate project and exlude it from the main one
+	rm -f jobs/services/clients/jukeboxsvc/pyproject.toml

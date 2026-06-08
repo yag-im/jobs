@@ -10,6 +10,10 @@ name = "jobs"
 readme = "README.md"
 version = "0.0.0"
 packages = [{ include = "jobs" }]
+# TODO: required explicit include as this folder is in .gitignore
+include = [
+    { path = "jobs/services/clients/jukeboxsvc/**/*.py", format = ["wheel"] },
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
