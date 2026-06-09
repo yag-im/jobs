@@ -217,7 +217,7 @@
         "/cluster/pull_image": {
             "post": {
                 "summary": "Cluster Pull Image",
-                "description": "Pulls specified image onto all available cluster nodes (asynchronously).",
+                "description": "Pulls specified image onto all available cluster nodes.",
                 "operationId": "pull_cluster_image",
                 "requestBody": {
                     "content": {
@@ -275,6 +275,23 @@
                 "summary": "Cluster Scale",
                 "description": "Scales the jukebox cluster: adds nodes when CPU utilization exceeds threshold,\nremoves old underutilized nodes, and syncs the OVH cluster state with SQL cluster schema.",
                 "operationId": "scale_cluster",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cluster/state/sync": {
+            "post": {
+                "summary": "Cluster State Sync",
+                "description": "Syncs cluster state with OVH API: updates SQL tables in \"cluster\" schema with the current list of nodes.",
+                "operationId": "sync_cluster_state",
                 "responses": {
                     "200": {
                         "description": "Successful Response",
@@ -723,55 +740,146 @@
             "EnvVars": {
                 "properties": {
                     "COLOR_BITS": {
-                        "type": "integer",
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Color Bits"
                     },
                     "FPS": {
-                        "type": "integer",
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Fps"
                     },
                     "LOADING_DURATION": {
-                        "type": "integer",
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Loading Duration"
                     },
                     "MAX_INACTIVITY_DURATION": {
-                        "type": "integer",
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Max Inactivity Duration"
                     },
                     "RUN_MIDI_SYNTH": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Run Midi Synth"
                     },
                     "SIGNALER_AUTH_TOKEN": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Signaler Auth Token"
                     },
                     "SIGNALER_HOST": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Signaler Host"
                     },
                     "SIGNALER_URI": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Signaler Uri"
                     },
                     "SCREEN_HEIGHT": {
-                        "type": "integer",
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Screen Height"
                     },
                     "SCREEN_WIDTH": {
-                        "type": "integer",
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Screen Width"
                     },
                     "STUN_URI": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Stun Uri"
                     },
                     "WS_CONN_ID": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Ws Conn Id"
                     },
                     "WS_CONSUMER_ID": {
-                        "type": "string",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
                         "title": "Ws Consumer Id"
                     },
                     "GST_DEBUG": {
@@ -820,21 +928,6 @@
                     }
                 },
                 "type": "object",
-                "required": [
-                    "COLOR_BITS",
-                    "FPS",
-                    "LOADING_DURATION",
-                    "MAX_INACTIVITY_DURATION",
-                    "RUN_MIDI_SYNTH",
-                    "SIGNALER_AUTH_TOKEN",
-                    "SIGNALER_HOST",
-                    "SIGNALER_URI",
-                    "SCREEN_HEIGHT",
-                    "SCREEN_WIDTH",
-                    "STUN_URI",
-                    "WS_CONN_ID",
-                    "WS_CONSUMER_ID"
-                ],
                 "title": "EnvVars"
             },
             "GpuModel": {
@@ -1203,7 +1296,7 @@
                     },
                     "preferred_dcs": {
                         "items": {
-                            "type": "string"
+                            "$ref": "#/components/schemas/DcRegion"
                         },
                         "type": "array",
                         "title": "Preferred Dcs"

@@ -8,6 +8,7 @@ from jobs.services.clients.jukeboxsvc.jukeboxsvc_client import Client
 from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import get_cluster_state as _get_cluster_state
 from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import scale_cluster as _scale_cluster
 from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import stop_container as _stop_container
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.api.default import sync_cluster_state as _sync_cluster_state
 from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.models import ClusterStateResponseDTO
 
 JUKEBOXSVC_URL = os.environ["JUKEBOXSVC_URL"]
@@ -35,5 +36,11 @@ def stop_container(node_id: str, container_id: str) -> None:
 
 def scale_cluster() -> None:
     resp = _scale_cluster.sync_detailed(client=_client())
+    if resp.status_code != HTTPStatus.OK:
+        raise JobException(message=resp.content.decode())
+
+
+def sync_cluster() -> None:
+    resp = _sync_cluster_state.sync_detailed(client=_client())
     if resp.status_code != HTTPStatus.OK:
         raise JobException(message=resp.content.decode())
