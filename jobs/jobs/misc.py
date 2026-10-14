@@ -12,15 +12,13 @@ class JobException(Exception):
         super().__init__(message)
 
 
-def catch_exceptions(cancel_on_failure=False):  # type: ignore[no-untyped-def]
-    def catch_exceptions_decorator(job_func):  # type: ignore[no-untyped-def]
+def catch_exceptions(cancel_on_failure=False):  # noqa: ANN001, ANN201
+    def catch_exceptions_decorator(job_func):  # noqa: ANN001, ANN202
         @functools.wraps(job_func)
-        def wrapper(*args, **kwargs):  # type: ignore[no-untyped-def]
+        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
             try:
                 return job_func(*args, **kwargs)
-            # pylint: disable=broad-except
-            except Exception:  # noqa: E722
-
+            except Exception:
                 print(traceback.format_exc())
                 if cancel_on_failure:
                     return schedule.CancelJob

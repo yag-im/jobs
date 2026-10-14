@@ -1,10 +1,8 @@
 import typing as t
 
 import requests
-from requests.adapters import (
-    HTTPAdapter,
-    Retry,
-)
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 def get_http_client_session(

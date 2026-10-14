@@ -1,4 +1,5 @@
 import datetime
+from http import HTTPStatus
 from unittest.mock import (
     MagicMock,
     patch,
@@ -6,6 +7,7 @@ from unittest.mock import (
 
 import pytest
 
+from jobs.jobs.misc import JobException
 from jobs.jobs.trim_sessions import (
     LONG_PAUSE_CONTAINER_PERIOD,
     LONG_PAUSE_PERIOD,
@@ -16,6 +18,8 @@ from jobs.jobs.trim_sessions import (
     trim_long_pending,
     trim_orphans,
 )
+from jobs.services import jukeboxsvc
+from jobs.services.clients.jukeboxsvc.jukeboxsvc_client.models import NodeDTO
 from jobs.services.dto.sessionsvc import (
     SessionDC,
     SessionStatus,
@@ -67,7 +71,7 @@ def _make_container(
     return c
 
 
-def _make_node(*, node_id: str = "n1", containers: list | None = None):
+def _make_node(*, node_id: str = "n1", containers: list | None = None) -> NodeDTO:
     """Return a minimal Node-like stub"""
     n = MagicMock()
     n.id = node_id
@@ -390,3 +394,86 @@ class TestRun:
         mock_orphans.assert_called_once_with(sessions=[session], nodes=[node])
         mock_paused.assert_called_once_with(sessions=[session], nodes=[node])
         mock_pending.assert_called_once_with(sessions=[session])
+
+    @patch("jobs.jobs.trim_sessions.stop_container")
+    @patch("jobs.jobs.trim_sessions.close_session")
+    @patch("jobs.jobs.trim_sessions.get_cluster_state")
+    @patch("jobs.jobs.trim_sessions.get_sessions")
+    @patch("jobs.jobs.trim_sessions.datetime")
+    def test_failing_orphan_session_does_not_block_long_paused_containers(
+        self, mock_dt, mock_get_sessions, mock_get_cluster, mock_close, mock_stop
+    ):
+        """Session whose container lived on a decommissioned node can't be closed - the rest must still be trimmed."""
+        mock_dt.datetime.now.return_value = _NOW
+        mock_dt.timezone = datetime.timezone
+        zombie = _make_session(sid="zombie", app_release_uuid="app-1", user_id=1, age_seconds=ORPHANED_PERIOD + 1)
+        orphan = _make_session(sid="orphan", app_release_uuid="app-2", user_id=2, age_seconds=ORPHANED_PERIOD + 1)
+        paused = _make_session(
+            sid="paused", status=SessionStatus.PAUSED, app_release_uuid="app-3", user_id=3, age_seconds=0
+        )
+        paused_container = _make_container(
+            cid="c3",
+            status="paused",
+            app_release_uuid="app-3",
+            user_id="3",
+            age_seconds=LONG_PAUSE_CONTAINER_PERIOD + 1,
+        )
+        mock_get_sessions.return_value.sessions = [zombie, orphan, paused]
+        mock_get_cluster.return_value.nodes = [_make_node(node_id="n1", containers=[paused_container])]
+
+        def close(sid: str) -> None:
+            if sid == "zombie":
+                raise JobException(message='{"code": 1404, "message": "node not found"}')
+
+        mock_close.side_effect = close
+
+        run()
+
+        mock_close.assert_any_call("zombie")
+        mock_close.assert_any_call("orphan")
+        mock_stop.assert_called_once_with("n1", "c3")
+
+
+# ---------------------------------------------------------------------------
+# jukeboxsvc.stop_container
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestStopContainer:
+    @staticmethod
+    def _resp(status: HTTPStatus, body: bytes) -> MagicMock:
+        r = MagicMock()
+        r.status_code = status
+        r.content = body
+        return r
+
+    @patch("jobs.services.jukeboxsvc._stop_container")
+    def test_ok(self, mock_api):
+        mock_api.sync_detailed.return_value = self._resp(HTTPStatus.OK, b"null")
+        jukeboxsvc.stop_container("n1", "c1")
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            b'{"code": 1404, "message": "node not found"}',
+            b'{"detail": {"code": 1404, "message": "node not found"}}',
+        ],
+    )
+    @patch("jobs.services.jukeboxsvc._stop_container")
+    def test_node_not_found_is_treated_as_stopped(self, mock_api, body):
+        mock_api.sync_detailed.return_value = self._resp(HTTPStatus.NOT_FOUND, body)
+        jukeboxsvc.stop_container("gone-node", "c1")
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            b'{"code": 1500, "message": "boom"}',
+            b"not a json",
+        ],
+    )
+    @patch("jobs.services.jukeboxsvc._stop_container")
+    def test_other_errors_raise(self, mock_api, body):
+        mock_api.sync_detailed.return_value = self._resp(HTTPStatus.INTERNAL_SERVER_ERROR, body)
+        with pytest.raises(JobException):
+            jukeboxsvc.stop_container("n1", "c1")

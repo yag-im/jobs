@@ -1,85 +1,92 @@
 [build-system]
-build-backend = "poetry_dynamic_versioning.backend"
-requires = ["poetry-core", "poetry-dynamic-versioning"]
+build-backend = "hatchling.build"
+requires = ["hatchling", "uv-dynamic-versioning"]
 
-[tool.poetry]
-authors = ["acme-im"]
-description = "yag asynchronous jobs"
-keywords = ["jobs", "asynchronous"]
+[project]
 name = "jobs"
+dynamic = ["version"]
+description = "yag asynchronous jobs"
+authors = [{ name = "acme-im" }]
+keywords = ["jobs", "asynchronous"]
 readme = "README.md"
-version = "0.0.0"
-packages = [{ include = "jobs" }]
-# TODO: required explicit include as this folder is in .gitignore
-include = [
-    { path = "jobs/services/clients/jukeboxsvc/**/*.py", format = ["wheel"] },
+requires-python = ">=3.14,<4.0"
+dependencies = [
+    "attrs>=22.2.0",
+    "httpx>=0.23.1,<0.29.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "opentelemetry-distro",
+    "opentelemetry-exporter-otlp",
+    "requests>=2.32.3,<3.0.0",
+    "schedule>=1.2.2,<2.0.0",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-attrs = ">=22.2.0"
-httpx = ">=0.23.1,<0.29.0"
-marshmallow = "^3.26.2"
-marshmallow-dataclass = "^8.7.0"
-opentelemetry-distro = "*"
-opentelemetry-exporter-otlp = "*"
-requests = "^2.32.3"
-schedule = "^1.2.2"
+[dependency-groups]
+dev = [
+    "pre-commit",
+    "pyright",
+    "ruff",
+]
+test = [
+    "pytest",
+    "pytest-dotenv",
+]
+codegen = [
+    "openapi-python-client",
+]
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "*"
-tox = "*"
-# move mypys' types-* modules deps into .pre-commit-config.yaml
+[tool.uv]
+default-groups = ["dev", "test"]
 
-[tool.poetry.group.test.dependencies]
-pytest = "*"
-pytest-dotenv = "*"
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
 
-[tool.poetry.group.codegen.dependencies]
-openapi-python-client = "*"
-
-[tool.poetry-dynamic-versioning]
-enable = true
+[tool.uv-dynamic-versioning]
 vcs = "git"
 style = "semver"
 
-[tool.bandit.assert_used]
-exclude = ["*_test.py", "test_*.py"]
+[tool.hatch.build.targets.wheel]
+packages = ["jobs"]
+# generated client is in .gitignore, so it must be force-included
+artifacts = ["jobs/services/clients/jukeboxsvc/**/*.py"]
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-exclude = '''
-(
-  \.git
-  | \.tox
-  | \.venv
-  | venv
-  | build
-  | dist
-)
-'''
+target-version = "py314"
+extend-exclude = ["jobs/services/clients/jukeboxsvc"]
 
-[tool.isort]
-include_trailing_comma = true
-force_grid_wrap = 2
-use_parentheses = true
-line_length = 120
-profile = "black"
-multi_line_output = 3
-skip = "target"
-skip_glob = "**/gen/*,.venv*/*,venv*/*,.tox/*"
-known_first_party = "jobs"
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit
+    "ANN",  # flake8-annotations (replaces mypy's disallow_untyped_defs)
+    "PL",   # pylint
+]
+ignore = [
+    "ANN401",   # typing.Any is allowed
+    "N818",     # exception names don't require an Error suffix
+    "PLR2004",  # magic value comparison
+]
 
-[tool.mypy]
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-ignore_missing_imports = true
-plugins = "marshmallow_dataclass.mypy"
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "ANN", "PLR"]
 
-[[tool.mypy.overrides]]
-# generated code
-module = "jobs.services.clients.*"
-ignore_errors = true
+[tool.ruff.lint.isort]
+known-first-party = ["jobs"]
+
+[tool.ruff.lint.pylint]
+max-args = 5
+
+[tool.pyright]
+include = ["jobs", "tests"]
+exclude = ["jobs/services/clients/jukeboxsvc"]
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
 
 [tool.pytest.ini_options]
 addopts = "-s -v"
@@ -92,30 +99,3 @@ markers = [
     "unit: marks unittests"
 ]
 testpaths = "tests"
-
-[tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = True
-skipsdist = True
-skip_missing_interpreters = True
-
-[testenv:lint]
-skip_install = false
-recreate = false
-ignore_errors = false
-deps =
-    pre-commit
-commands =
-    pre-commit run --all-files
-
-[testenv:test]
-recreate = false
-ignore_errors = true
-deps =
-    poetry
-commands_pre =
-    poetry install --with test
-commands =
-    poetry run pytest tests/
-"""

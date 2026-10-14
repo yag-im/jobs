@@ -28,6 +28,21 @@ ORPHANED_PERIOD = 30
 log = logging.getLogger("jobs.job_trim_sessions")
 
 
+def _close_session_safe(session_id: str) -> None:
+    # a single failing session (e.g. its node was decommissioned) must not block trimming of the others
+    try:
+        close_session(session_id)
+    except Exception as e:
+        log.error("\tfailed to close session %s: %s", session_id, e)
+
+
+def _stop_container_safe(node_id: str, container_id: str) -> None:
+    try:
+        stop_container(node_id, container_id)
+    except Exception as e:
+        log.error("\tfailed to stop container %s on node %s: %s", container_id, node_id, e)
+
+
 def log_sessions_report(sessions: list[SessionDC]) -> None:
     log.debug(
         "\tsessions - pending: %d, active: %d, paused: %d, total: %d",
@@ -48,7 +63,7 @@ def trim_long_paused(
     for s in sessions:
         if (s.status == SessionStatus.PAUSED) and (now - s.updated).total_seconds() > LONG_PAUSE_PERIOD:
             log.info("\tclosing long paused session: %s", s.id)
-            close_session(s.id)
+            _close_session_safe(s.id)
 
     # stop containers that have been paused for too long, irrespective of session state
     for n in nodes:
@@ -60,7 +75,7 @@ def trim_long_paused(
                 and (now - c.created).total_seconds() > LONG_PAUSE_CONTAINER_PERIOD
             ):
                 log.info("\tstopping long paused container: %s on node %s", c.id, n.id)
-                stop_container(n.id, c.id)
+                _stop_container_safe(n.id, c.id)
 
 
 def trim_long_pending(sessions: list[SessionDC]) -> None:
@@ -70,7 +85,7 @@ def trim_long_pending(sessions: list[SessionDC]) -> None:
     for s in sessions:
         if (s.status == SessionStatus.PENDING) and (now - s.updated).total_seconds() > LONG_PENDING_PERIOD:
             log.info("\tclosing long pending session: %s", s.id)
-            close_session(s.id)
+            _close_session_safe(s.id)
 
 
 def trim_orphans(sessions: list[SessionDC], nodes: list[NodeDTO]) -> None:
@@ -100,10 +115,10 @@ def trim_orphans(sessions: list[SessionDC], nodes: list[NodeDTO]) -> None:
         if k not in containers_dct and (now - v.updated).total_seconds() > ORPHANED_PERIOD
     ]
     if orphaned_sessions:
-        log.info(f"\torphaned sessions: {orphaned_sessions}")  # pylint: disable=logging-fstring-interpolation
+        log.info(f"\torphaned sessions: {orphaned_sessions}")
         for s in orphaned_sessions:
             log.info("\tclosing orphaned session: %s", s.id)
-            close_session(s.id)
+            _close_session_safe(s.id)
 
     orphaned_containers: list[tuple[ContainerDTO, str]] = [
         v
@@ -114,10 +129,10 @@ def trim_orphans(sessions: list[SessionDC], nodes: list[NodeDTO]) -> None:
         and (now - v[0].created).total_seconds() > ORPHANED_PERIOD
     ]
     if orphaned_containers:
-        log.info(f"\torphaned containers: {orphaned_containers}")  # pylint: disable=logging-fstring-interpolation
+        log.info(f"\torphaned containers: {orphaned_containers}")
         for oc in orphaned_containers:
             log.info("\tstopping orphaned container: %s", oc[0].id)
-            stop_container(oc[1], oc[0].id)
+            _stop_container_safe(oc[1], oc[0].id)
 
 
 def run() -> None:

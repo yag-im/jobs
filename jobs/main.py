@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     if ENABLE_CLUSTER_SYNC_JOB := os.getenv("ENABLE_CLUSTER_SYNC_JOB", "false").lower() == "true":
         logging.info("CLUSTER_SYNC_JOB is enabled")
-        schedule.every(1.1).minutes.do(enqueue_if_empty, sync_cluster_queue, sync_cluster_job)
+        schedule.every(66).seconds.do(enqueue_if_empty, sync_cluster_queue, sync_cluster_job)
     if ENABLE_CLUSTER_SCALE_JOB := os.getenv("ENABLE_CLUSTER_SCALE_JOB", "false").lower() == "true":
         logging.info("CLUSTER_SCALE_JOB is enabled")
         schedule.every(1).minutes.do(enqueue_if_empty, scale_cluster_queue, scale_cluster_job)

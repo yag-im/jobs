@@ -16,7 +16,7 @@ def get_sessions() -> GetSessionsResponseDTO:
     )
     if res.status_code != 200:
         raise JobException(message=res.text)
-    return GetSessionsResponseDTO.Schema().load(data=res.json())
+    return GetSessionsResponseDTO.model_validate(res.json())
 
 
 def close_session(session_id: str) -> None:
